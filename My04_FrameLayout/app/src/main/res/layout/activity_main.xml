@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+
+    android:weightSum="10">
+
+    <Button
+        android:id="@+id/btnChgImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:text="이미지 바꾸기"
+        android:layout_weight="0.8"
+        android:textSize="24sp"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="9.2">
+
+        <ImageView
+            android:id="@+id/image1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/dream01"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/image2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/dream02"
+            android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/image3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/dream03"
+            android:visibility="gone"/>
+
+    </FrameLayout>
+
+
+
+</LinearLayout>
