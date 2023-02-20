@@ -21,8 +21,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.Glide;
+import com.example.myprojectx.ASyncTask.ApiClient;
+import com.example.myprojectx.ASyncTask.ApiInterface;
 import com.example.myprojectx.COMMON.CommonMethod;
 import com.example.myprojectx.DTO.MemberDTO;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -101,6 +104,17 @@ public class JoinActivity extends AppCompatActivity {
         findViewById(R.id.btnJoinMem).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
+                String id = etIDMem.getText().toString();
+                String pw = etPWMem.getText().toString();
+                String name = etName.getText().toString();
+                String phone = etPhone.getText().toString();
+                String address = etAddress.getText().toString();
+
+                // 보낼 파일 MultipartBody.Part 생성
+
+               CommonMethod commonMethod = new CommonMethod();
                 MemberDTO dto = new MemberDTO() ;
 
                 dto.setId(etIDMem.getText().toString());
@@ -108,16 +122,19 @@ public class JoinActivity extends AppCompatActivity {
                 dto.setName( etName.getText().toString());
                 dto.setPhone(etPhone.getText().toString());
                 dto.setAddress(etAddress.getText().toString());
-                dto.setProfile(imgFilePath);
+                dto.setProfile(etAddress.getText().toString());
 
+                commonMethod.setParams("param", dto);
                 // 보낼 파일 MultipartBody.Part 생성
                 // List<MultipartBody.Part> imgs = new ArrayList<>();
-                RequestBody fileBody = RequestBody.create(MediaType.parse("image/jpeg"), new File(imgFilePath));
-                MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", "test.jpg", fileBody);
-
-                CommonMethod commonMethod = new CommonMethod();
+                RequestBody fileBody =null;
+                MultipartBody.Part filePart =null;
+                if(imgFile != null) {
+                     fileBody = RequestBody.create(MediaType.parse("image/jpeg"), new File(imgFilePath));
+                     filePart = MultipartBody.Part.createFormData("file", "test.jpg", fileBody);
+                }
                 // 데이터를 파라메터로 보낸다
-                commonMethod.setParams("param", dto);
+                //commonMethod.setParams("param", dto);
                 // 서버로 보내는 부분
                 commonMethod.sendFile("anJoin", filePart, new Callback<String>() {
                     @Override
@@ -131,38 +148,6 @@ public class JoinActivity extends AppCompatActivity {
                         Log.d(TAG, "onResponse: 보내기 실패 => " + t.getMessage() );
                     }
                 });
-
-//                commonMethod.getData("anJoin", new Callback<String>() {
-//                    @Override
-//                    public void onResponse(Call<String> call, Response<String> response) {
-//                        Log.d(TAG, "onResponse: 삽입성공" + response.body());
-//
-//
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<String> call, Throwable t) {
-//                        Log.d(TAG, "onFailure: 삽입실패" + t.getMessage());
-//                    }
-//                });
-//
-//                // 이미지 보내기
-//                RequestBody fileBody = RequestBody.create(MediaType.parse("image/jpeg"), new File(imgFilePath));
-//                MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", "test.jpg", fileBody);
-//                ApiInterface apiInterface = new ApiClient().getApiClient().create(ApiInterface.class);
-//                apiInterface.sendFile(filePart).enqueue(new Callback<String>() {
-//                    @Override
-//                    public void onResponse(Call<String> call, Response<String> response) {
-//                        Log.d(TAG, "onResponse: 사진전송성공" + response.body());
-//
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<String> call, Throwable t) {
-//                        Log.d(TAG, "onResponse: 사진전송실패" + t.getMessage());
-//
-//                    }
-//                });
 
 
 

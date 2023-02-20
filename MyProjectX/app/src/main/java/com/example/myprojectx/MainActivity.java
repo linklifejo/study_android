@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -17,6 +18,10 @@ import android.widget.Toast;
 import com.example.myprojectx.COMMON.CommonMethod;
 import com.example.myprojectx.DTO.MemberDTO;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,13 +31,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "main:MainActivity";
     EditText etID, etPW;
     Button btnLogin, btnJoin;
-
+    public static final int REQUEST_PERMISSION = 11;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        checkDangerousPermissions();
+        checkPermission();
 
         etID = findViewById(R.id.etID);
         etPW = findViewById(R.id.etPW);
@@ -52,10 +57,13 @@ public class MainActivity extends AppCompatActivity {
                 commonMethod.getData("anLogin", new Callback<String>() {
                     @Override
                     public void onResponse(Call<String> call, Response<String> response) {
-                        if(!response.body().equals(null)){
-                            Log.d(TAG, "onResponse: " + response.body());
-                            //서버에서 넘어온 데이터를 받는다
-                            loginDto = new Gson().fromJson(response.body(), MemberDTO.class);
+                        if(response.isSuccessful()){
+
+//                            Log.d(TAG, "onResponse: " + response.body());
+//                            //서버에서 넘어온 데이터를 받는다
+                            Gson gson = new Gson();
+                            loginDto = gson.fromJson(response.body().toString(), MemberDTO.class);
+
                             Toast.makeText(MainActivity.this,
                                     loginDto.getId() + "님 반갑습니다!!!",Toast.LENGTH_SHORT).show();
                             //로그인 후 메인 화면을 보여준다
@@ -93,50 +101,49 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // 위험권한 : 실행시 허용여부를 다시 물어봄
-    private void checkDangerousPermissions() {
-        String[] permissions = {
-                // 위험권한 내용 : 메니페스트에 권한을 여기에 적음
-                android.Manifest.permission.CAMERA,
-                android.Manifest.permission.ACCESS_MEDIA_LOCATION,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-        };
+    //권한 확인
+    public void checkPermission() {
+        int permissionCamera = ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA);
+        int permissionRead = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE);
+        int permissionWrite = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        int permissionCheck = PackageManager.PERMISSION_GRANTED;
-        for (int i = 0; i < permissions.length; i++) {
-            permissionCheck = ContextCompat.checkSelfPermission(this, permissions[i]);
-            if (permissionCheck == PackageManager.PERMISSION_DENIED) {
-                break;
+        //권한이 없으면 권한 요청
+        if (permissionCamera != PackageManager.PERMISSION_GRANTED
+                || permissionRead != PackageManager.PERMISSION_GRANTED
+                || permissionWrite != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.CAMERA)) {
+                Toast.makeText(this, "이 앱을 실행하기 위해 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
             }
-        }
 
-        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "권한 있음", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, "권한 없음", Toast.LENGTH_LONG).show();
+            ActivityCompat.requestPermissions(this, new String[]{
+                    android.Manifest.permission.CAMERA, android.Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
 
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
-                Toast.makeText(this, "권한 설명 필요함.", Toast.LENGTH_LONG).show();
-            } else {
-                ActivityCompat.requestPermissions(this, permissions, 1);
-            }
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST_PERMISSION: {
+                // 권한이 취소되면 result 배열은 비어있다.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-        if (requestCode == 1) {
-            for (int i = 0; i < permissions.length; i++) {
-                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, permissions[i] + " 권한이 승인됨.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "권한 확인", Toast.LENGTH_LONG).show();
+
                 } else {
-                    Toast.makeText(this, permissions[i] + " 권한이 승인되지 않음.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "권한 없음", Toast.LENGTH_LONG).show();
+                    finish(); //권한이 없으면 앱 종료
                 }
             }
         }
     }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkPermission(); //권한체크
+    }
 }

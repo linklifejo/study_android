@@ -18,7 +18,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,21 +49,24 @@ public class SubActivity extends AppCompatActivity {
 
         // 서버에 member들 데이터를 요청
         CommonMethod commonMethod = new CommonMethod();
-        commonMethod.setParams("id",loginDto.getId());
+      //  commonMethod.setParams("id",loginDto.getId());
         commonMethod.getData("selectMembers", new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
 
-                    if(!response.body().equals(null)){
-//                    Log.d(TAG, "onResponse: " + response.body());
-//                    //서버에서 넘어온 데이터를 받는다
+               if(response.isSuccessful()){
+                  Log.d(TAG, "onResponse: " + response.body());
+                    //서버에서 넘어온 데이터를 받는다
+ //                 dtos = new ArrayList<>(Arrays.asList(new Gson().fromJson(response.body(), MemberDTO[].class)));
+
                    Gson gson = new Gson();
-                    dtos = gson.fromJson(response.body(), new TypeToken<ArrayList<MemberDTO>>(){}.getType());
+                    dtos =  gson.fromJson(response.body(), new TypeToken<ArrayList<MemberDTO>>(){}.getType());
 
 
                     for(MemberDTO dto: dtos){
                         dto.setProfile(ipConfig + "resources/" + dto.getProfile());
                     }
+
                     adapter = new MemberAdapter(SubActivity.this,dtos);
 
                    recyclerView.setAdapter(adapter);

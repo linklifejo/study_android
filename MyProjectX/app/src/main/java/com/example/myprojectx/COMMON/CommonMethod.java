@@ -15,7 +15,7 @@ import retrofit2.Callback;
 
 public class CommonMethod {
 
-    public static String ipConfig = "http://192.168.0.11:8989/app/";
+    public static String ipConfig = "http://192.168.0.3:8989/app/";
     public static MemberDTO loginDto = null;
 
     // 해당하는 getData라는 메소드를 여러 액티비티와 프래그먼트에서 재활용을 통해
